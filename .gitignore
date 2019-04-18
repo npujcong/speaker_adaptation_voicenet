@@ -27,3 +27,6 @@ ENV/
 egs/**/config/
 egs/**/data/
 egs/**/exp/
+tools/SPTK-3.9
+tools/bin
+egs/*
