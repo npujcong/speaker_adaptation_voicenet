@@ -194,7 +194,7 @@ def train():
 
         if FLAGS.resume_training:
             restore_from_ckpt(sess, saver)
-
+        sess.run(tf.assign(learning_rate,FLAGS.learning_rate))
         # add a blank line for log readability
         print()
         sys.stdout.flush()
