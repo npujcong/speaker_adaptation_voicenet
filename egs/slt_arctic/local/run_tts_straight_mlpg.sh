@@ -110,9 +110,9 @@ if [ $stage -le 3 ]; then
 fi
 
 # Export graph for inference
-#if [ $stage -le 4 ]; then
-#  if $export_graph; then
-#    echo "Exporting graph"
-#    CUDA_VISIBLE_DEVICES= TF_CPP_MIN_LOG_LEVEL=1 python $voicenet_dir/src/export_inference_graph.py  --output_file=$dir/frozen_acoustic.pb --checkpoint_path=$dir/nnet "$@"
-#  fi
-#fi
+if [ $stage -le 4 ]; then
+  if $export_graph; then
+    echo "Exporting graph"
+    CUDA_VISIBLE_DEVICES= TF_CPP_MIN_LOG_LEVEL=1 python $voicenet_dir/src/export_inference_graph.py  --output_file=$dir/frozen_acoustic.pb --checkpoint_path=$dir/nnet "$@"
+  fi
+fi
