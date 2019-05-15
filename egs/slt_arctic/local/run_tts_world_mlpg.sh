@@ -19,7 +19,7 @@
 current_working_dir=$(pwd)
 voicenet_dir=$(dirname $(dirname $current_working_dir))
 
-stage=5
+stage=1
 raw=raw
 data=data
 config=config
@@ -71,7 +71,7 @@ if [ $stage -le 0 ]; then
     [ ! -e $data/valid ] && mkdir -p $data/valid
     [ ! -e $data/test ] && mkdir -p $data/test
     # You should change the dimensions here to match your own dataset
-    python ${voicenet_dir}/src/utils/convert_to_records_parallel.py --input_dim=297 --output_dim=75
+    ./pyqueue_tts.pl -q all.q stage1_log_file python ${voicenet_dir}/src/utils/convert_to_records_parallel.py --input_dim=246 --output_dim=127
   fi
 fi
 
@@ -94,7 +94,12 @@ fi
 # Vocoder synthesis
 if [ $stage -le 3 ]; then
   echo "Synthesizing wav"
-  python $voicenet_dir/misc/scripts/split_cmp.py --dir=$dir/test
+  python $voicenet_dir/misc/scripts/world_mlpg/cmvn2dat.py \
+       --var=$current_working_dir/var \
+       --cmvn=$data/train_cmvn.npz
+  python $voicenet_dir/misc/scripts/world_mlpg/parameter_generation.py \
+      --out_dir=$dir/test \
+      --var_dir=$current_working_dir/var/
   sh $voicenet_dir/misc/scripts/synthesize.sh $dir/test
 fi
 
@@ -116,7 +121,9 @@ if [ $stage -le 5 ]; then
         | sed "s/label/cmp/g" \
         | sed "s/.lab/.cmp/g" \
         | xargs -i cp {} $dir/reference/cmp
-    python $voicenet_dir/misc/scripts/split_cmp.py --dir=$dir/reference
+    python $voicenet_dir/misc/scripts/world_mlpg/parameter_generation.py \
+        --out_dir=$current_working_dir/$dir/reference \
+        --var_dir=$current_working_dir/var/
     sh $voicenet_dir/misc/scripts/synthesize.sh $dir/reference
     $voicenet_dir/misc/scripts/getscp.sh \
         $dir/test/cmp \
